@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">TakeAndChoosePhoto</string>
+    <string name="btnTake">Take Photo</string>
+    <string name="btnChoose">Choose from galery</string>
+    <string name="chooseCamera">Choose Camera App</string>
+    <string name="chooseStr">Choose Image From Galery</string>
+    <string name="Des">Description</string>
+</resources>

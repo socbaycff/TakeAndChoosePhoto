@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TakeAndChoosePhoto</string>
+    <string name="btnChoose">Chọn ảnh</string>
+    <string name="btnTake">Chụp ảnh</string>
+    <string name="chooseCamera">Chọn ứng dụng chụp ảnh</string>
+    <string name="chooseStr">Chọn ảnh từ thư viện</string>
+    <string name="Des">Mô tả</string>
+</resources>
