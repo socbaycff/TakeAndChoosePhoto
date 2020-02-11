@@ -34,6 +34,8 @@
         android:layout_height="681dp"
         android:layout_marginStart="1dp"
         android:layout_marginTop="1dp"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/takephoto" />
 

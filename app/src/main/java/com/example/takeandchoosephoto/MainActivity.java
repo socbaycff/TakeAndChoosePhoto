@@ -8,8 +8,10 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.icu.text.SimpleDateFormat;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.provider.MediaStore;
@@ -62,6 +64,7 @@ public class MainActivity extends AppCompatActivity {
         adapter = new GridViewAdapter();
         gridView.setAdapter(adapter);
 
+
     }
 
 
@@ -86,12 +89,11 @@ public class MainActivity extends AppCompatActivity {
                         "com.example.takeandchoosephoto",
                         photoFile);
 
-
                 intent.putExtra(MediaStore.EXTRA_OUTPUT, imageUri); // luu vao uri nay sau khi xong
+
                 startActivityForResult(Intent.createChooser(intent, getString(R.string.chooseCamera)), RC_TAKE); // dùng hàm mở activy với trả về kết quả , bao phủ intent với chooser để user chọn app đã có trên máy để chụpảnh
                 // gửi đi với mã yêu cầu (resquest code) RC_TAKE để nhận diện sau khi chụp xong (xử lý trong onActivityResult)
             }
-
         }
     }
 
@@ -104,7 +106,6 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(Intent.createChooser(intent,getString(R.string.chooseStr)), RC_CHOOSE); // tương tự trên
             // gửi đi với mã yêu cầu (resquest code) RC_CHOOSE để nhận diện sau khi chụp xong (xử lý trong onActivityResult)
         }
-
     }
 
     @Override
@@ -114,56 +115,54 @@ public class MainActivity extends AppCompatActivity {
 //            Bundle data1 = data.getExtras();
 //            adapter.add((Bitmap) data1.get("data"));
             Bitmap bitmap = null;
-            try {
-                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                adapter.add(bitmap);
-                galleryAddPic();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
 
-
+            bitmap = getBitMap(imageUri);
+            adapter.add(bitmap);
+            galleryAddPic();
         }
 
         if (requestCode == RC_CHOOSE && resultCode == RESULT_OK) { // nếu trở về activity này từ yêu cầu chọn RC_CHOOSE, và user đồng ý chọn ảnh (RESULT_OK)
-            ClipData clipData = data.getClipData();
+            ClipData clipData = data.getClipData(); // return nhieu anh thi khac null
             if (clipData == null) {
                 Uri imageUri = data.getData(); // lấy URI chỉ vị trí ảnh trả về từ activity chọn ảnh
                 Bitmap bitmap = null;
-                try {
-                    bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageUri);
-                    adapter.add(bitmap);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
+                bitmap = getBitMap(imageUri);
+                adapter.add(bitmap);
             } else {
                 Bitmap bitmap = null;
                 for (int i = 0; i< clipData.getItemCount();i++) {
+                    bitmap = getBitMap(imageUri);
+                    adapter.add(bitmap);
 
-                    try {
-                        bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), clipData.getItemAt(i).getUri());
-                        adapter.add(bitmap);
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
                 }
 
             }
-
-
-
-
 
         }
 
         if (resultCode == RESULT_CANCELED) { // nếu user huỷ activity dc mở
-
             Toast.makeText(getApplicationContext(), "Canceled",Toast.LENGTH_SHORT).show(); // hiện toast báo đã huỷ
         }
 
+    }
 
+    Bitmap getBitMap(Uri imageUri) {
+        Bitmap bitmap = null;
+        if (Build.VERSION.SDK_INT < 28) {
+            try {
+                bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(),imageUri);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            ImageDecoder.Source source = ImageDecoder.createSource(this.getContentResolver(), imageUri);
+            try {
+                bitmap = ImageDecoder.decodeBitmap(source);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
 
+        }
+        return bitmap;
     }
 }
