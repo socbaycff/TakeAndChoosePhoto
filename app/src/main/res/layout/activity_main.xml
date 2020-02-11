@@ -28,14 +28,12 @@
         app:layout_constraintStart_toEndOf="@+id/takephoto"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <GridView
-        android:id="@+id/gridView"
-        android:layout_width="409dp"
-        android:layout_height="681dp"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/recycler"
+        android:layout_width="410dp"
+        android:layout_height="282dp"
         android:layout_marginStart="1dp"
         android:layout_marginTop="1dp"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="5dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/takephoto" />
 
