@@ -1,49 +1,35 @@
 package com.example.takeandchoosephoto;
 
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.FileProvider;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
-
 import android.Manifest;
 import android.content.ClipData;
 import android.content.ContentResolver;
 import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.ImageDecoder;
-import android.icu.text.SimpleDateFormat;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
+import android.text.Layout;
 import android.view.View;
-import android.widget.GridView;
-import android.widget.ImageView;
+import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.Toast;
 
-import com.google.android.gms.ads.AdRequest;
-import com.google.android.gms.ads.AdSize;
-import com.google.android.gms.ads.AdView;
-import com.google.android.gms.ads.MobileAds;
-import com.google.android.gms.ads.initialization.InitializationStatus;
-import com.google.android.gms.ads.initialization.OnInitializationCompleteListener;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.core.app.ActivityCompat;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Date;
 
 public class MainActivity extends AppCompatActivity {
-
     Uri imageUri;
-
-
 
     private Uri createImageUri() { // tao file rong voi dinh dang, ten. thu muc
 
@@ -55,12 +41,11 @@ public class MainActivity extends AppCompatActivity {
         contentValues1.put(MediaStore.MediaColumns.RELATIVE_PATH, "DCIM/PerracoLabs");
 
 
-        Uri uri = contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues1);
         // Create an image file name
      //   String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
     //    String imageFileName = "JPEG_" + timeStamp + "_";
 
-        return uri;
+        return contentResolver.insert(MediaStore.Images.Media.EXTERNAL_CONTENT_URI,contentValues1);
     }
 
     public static int RC_TAKE = 1;
@@ -72,12 +57,34 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN);
         recyclerView = findViewById(R.id.recycler);
         adapter = new ImagesAdapter();
         recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setAdapter(adapter);
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 4);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE},4);
+    }
 
+    public int dpToPx(int dp) {
+        float density = getResources()
+                .getDisplayMetrics()
+                .density;
+        return Math.round((float) dp * density);
+    }
+
+    public void showImageList() {
+        ConstraintLayout parent = findViewById(R.id.parent);
+        recyclerView = new RecyclerView(this);
+        ConstraintLayout.LayoutParams lp = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, dpToPx(282));
+        lp.startToStart = R.id.parent;
+        lp.topToBottom = R.id.takephoto;
+
+        parent.addView(recyclerView,lp);
+        //  recyclerView = findViewById(R.id.recycler);
+        adapter = new ImagesAdapter();
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setAdapter(adapter);
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 4);
     }
 
 
@@ -117,7 +124,8 @@ public class MainActivity extends AppCompatActivity {
             // lay bitmap thumbnail
 //            Bundle data1 = data.getExtras();
 //            adapter.add((Bitmap) data1.get("data"));
-            Bitmap bitmap = null;
+
+            Bitmap bitmap;
 
             bitmap = getBitMap(imageUri);
 
@@ -126,14 +134,15 @@ public class MainActivity extends AppCompatActivity {
         }
 
         if (requestCode == RC_CHOOSE && resultCode == RESULT_OK) { // nếu trở về activity này từ yêu cầu chọn RC_CHOOSE, và user đồng ý chọn ảnh (RESULT_OK)
+           // showImageList();
             ClipData clipData = data.getClipData(); // return nhieu anh thi khac null
             if (clipData == null) {
                 Uri imageUri = data.getData(); // lấy URI chỉ vị trí ảnh trả về từ activity chọn ảnh
-                Bitmap bitmap = null;
+                Bitmap bitmap;
                 bitmap = getBitMap(imageUri);
                 adapter.add(bitmap);
             } else {
-                Bitmap bitmap = null;
+                Bitmap bitmap;
                 for (int i = 0; i< clipData.getItemCount();i++) {
                     bitmap = getBitMap(clipData.getItemAt(i).getUri());
                     adapter.add(bitmap);
@@ -168,5 +177,11 @@ public class MainActivity extends AppCompatActivity {
 
         }
         return bitmap;
+    }
+
+    // xu ly
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 }
